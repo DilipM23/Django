@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Student</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        $(document).ready(function(){
+            $('#search-input').on('input',
+                function() {
+                    var query = $(this).val();
+                    console.log(query)
+                    $.ajax({
+                        url: '{% url "search_students" %}',
+                        data : { 'query': query},
+                    success: function(data)
+                    {
+                        var result = data.result;
+                        var html = '';
+                        if(result.length > 0)
+                        {
+                            html += '<ul>';
+                            for(var i = 0; i < result.length; i++)
+                            {
+                                var student = result[i]
+                                html += '<li>'
+                                html += '<p><string> Name: </strong>' + student.student_name + '</p>';
+                                html += '<p><string> Courses: </strong>' + student.courses.join(',') + '</p>';
+                                html += '</li>';
+                            }
+                            html += '</ul>';
+                        }
+                        else{
+                            html += '<p> No students found </p>';
+                        }
+                        $('#search-results').html(html)
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    {% csrf_token %}
+    <h1>Students</h1>
+    <input type="text" id="search-input" placeholder="Search for a student" />
+    <div id="search-results"></div>
+</body>
+</html>
